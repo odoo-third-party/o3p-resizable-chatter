@@ -1,0 +1,1 @@
+# o3p-resizable-chatter
