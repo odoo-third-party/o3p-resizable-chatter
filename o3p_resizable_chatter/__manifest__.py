@@ -1,5 +1,5 @@
 {
-    "name": "O3P Resizable Chatter",
+    "name": "o3p - resizable chatter",
     "summary": "Resizable chatter for Odoo.",
     "version": "20.0.1.1.0",
     "category": "Productivity/Discuss",
@@ -7,6 +7,7 @@
     "website": "https://github.com/odoo-third-party/o3p-resizable-chatter",
     "license": "LGPL-3",
     "depends": ["mail"],
+    "sequence":1,
     "data": [],
     "assets": {
         "web.assets_backend": [
