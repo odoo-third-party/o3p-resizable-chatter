@@ -1,7 +1,7 @@
 {
     "name": "O3P Resizable Chatter",
     "summary": "Resizable chatter for Odoo.",
-    "version": "20.0.1.0.0",
+    "version": "20.0.1.1.0",
     "category": "Productivity/Discuss",
     "author": "O3P",
     "website": "https://github.com/odoo-third-party/o3p-resizable-chatter",

@@ -3,6 +3,7 @@ import "@mail/chatter/web/form_renderer";
 
 import { onWillUnmount } from "@odoo/owl";
 
+import { browser } from "@web/core/browser/browser";
 import { append, createElement, setAttributes } from "@web/core/utils/xml";
 import { patch } from "@web/core/utils/patch";
 import { FormCompiler } from "@web/views/form/form_compiler";
@@ -10,6 +11,7 @@ import { FormRenderer } from "@web/views/form/form_renderer";
 
 const EXTRA_WIDTH_PROPERTY = "--Chatter-asideExtraWidth";
 const RESIZED_CLASS = "o3p-resizable-chatter-resized";
+const STORAGE_KEY = "o3p_resizable_chatter.extra_width";
 const MIN_CHATTER_WIDTH = 280;
 const MIN_FORM_WIDTH = 320;
 
@@ -20,6 +22,10 @@ patch(FormCompiler.prototype, {
             if (chatter.querySelector(".o3p-resizable-chatter-handle")) {
                 continue;
             }
+            setAttributes(chatter, {
+                "t-att-class": `{ '${RESIZED_CLASS}': __comp__.o3pChatterExtraWidth !== null }`,
+                "t-att-style": `__comp__.o3pChatterExtraWidth !== null ? '${EXTRA_WIDTH_PROPERTY}: ' + __comp__.o3pChatterExtraWidth + 'px;' : ''`,
+            });
             const handle = createElement("div");
             handle.classList.add("o3p-resizable-chatter-handle");
             setAttributes(handle, {
@@ -36,6 +42,8 @@ patch(FormCompiler.prototype, {
 patch(FormRenderer.prototype, {
     setup() {
         super.setup(...arguments);
+        const storedExtraWidth = Number.parseFloat(browser.localStorage.getItem(STORAGE_KEY));
+        this.o3pChatterExtraWidth = Number.isFinite(storedExtraWidth) ? storedExtraWidth : null;
         onWillUnmount(() => this._o3pStopChatterResize?.());
     },
 
@@ -67,6 +75,7 @@ patch(FormRenderer.prototype, {
             initialExtraWidth += initialWidth - formulaWidth;
             chatter.style.setProperty(EXTRA_WIDTH_PROPERTY, `${initialExtraWidth}px`);
         }
+        this.o3pChatterExtraWidth = initialExtraWidth;
 
         const containerWidth = chatter.parentElement.getBoundingClientRect().width;
         const maxChatterWidth = Math.max(MIN_CHATTER_WIDTH, containerWidth - MIN_FORM_WIDTH);
@@ -79,6 +88,7 @@ patch(FormRenderer.prototype, {
             );
             const extraWidth = initialExtraWidth + requestedWidth - initialWidth;
             chatter.style.setProperty(EXTRA_WIDTH_PROPERTY, `${extraWidth}px`);
+            this.o3pChatterExtraWidth = extraWidth;
         };
 
         const stop = () => {
@@ -87,6 +97,7 @@ patch(FormRenderer.prototype, {
             window.removeEventListener("pointercancel", stop);
             window.removeEventListener("blur", stop);
             document.body.classList.remove("o3p-resizing-chatter");
+            browser.localStorage.setItem(STORAGE_KEY, this.o3pChatterExtraWidth);
             this._o3pStopChatterResize = null;
         };
 
@@ -102,5 +113,7 @@ patch(FormRenderer.prototype, {
         const chatter = event.currentTarget.parentElement;
         chatter.style.removeProperty(EXTRA_WIDTH_PROPERTY);
         chatter.classList.remove(RESIZED_CLASS);
+        this.o3pChatterExtraWidth = null;
+        browser.localStorage.removeItem(STORAGE_KEY);
     },
 });
